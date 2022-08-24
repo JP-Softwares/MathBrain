@@ -88,6 +88,6 @@ public class Expressao {
                 }
             }
         }
-
+        return ""; // SIM EU ALTEREI PRA TIRAR O ERRO :)
     }
 }
