@@ -4,7 +4,10 @@
  */
 package com.jp.visao;
 import com.jp.modelos.Expressao;
+import java.awt.Font;
+import java.awt.event.KeyEvent;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -15,10 +18,484 @@ public class TelaPrincipal extends javax.swing.JFrame {
     /**
      * Creates new form TelaPrincipal
      */
+    
+    boolean emOperacao = false; // Para saber se está em operação no momento
+    boolean virgula = false; // Para saber se já foi clicado na vírgula
+    boolean calculado = false;
+    String saida = "0"; // Para contar quantos caracteres de número tem na string
+    int contSaida = 0;
+    int limiteDeTamanho = 21;
+    Expressao MathBrain = null;
+    int parenteAbre = 0;
+    int parenteFecha = 0;
+    
     public TelaPrincipal() {
         initComponents();
         this.setLocationRelativeTo(null);
         jLabel1Apagar.setVisible(false);
+    }
+    
+    public void atualizarResultado(String saida){
+        jLabelCalculo.setText(saida);
+    }
+    
+    public void numero(int numero){
+        if(contSaida < limiteDeTamanho){
+            calculado();
+            if(saida.equals("0")){
+                switch(numero){
+                    case 0:
+                        saida = "0";
+                        contSaida--;
+                        break;
+                    case 1:
+                        saida = "1";
+                        break;
+                    case 2:
+                        saida = "2";
+                        break;
+                    case 3:
+                        saida = "3";
+                        break;
+                    case 4:
+                        saida = "4";
+                        break;
+                    case 5:
+                        saida = "5";
+                        break;
+                    case 6:
+                        saida = "6";
+                        break;
+                    case 7:
+                        saida = "7";
+                        break;
+                    case 8:
+                        saida = "8";
+                        break;
+                    case 9:
+                        saida = "9";
+                        break;
+                }
+            }else{
+                saida += numero;
+            }
+            atualizarResultado(saida);
+            emOperacao = false;
+            contSaida++;
+        }
+        
+        tamanhodeCaracteres();
+    }
+    
+    public void tamanhodeCaracteres(){
+        if(contSaida < 9){
+            jLabelCalculo.setFont(new Font("Tahoma", Font.TRUETYPE_FONT, 36));
+        }else{
+            if(contSaida < 12){
+                jLabelCalculo.setFont(new Font("Tahoma", Font.TRUETYPE_FONT, 28));
+            }else{
+                if(contSaida < 15){
+                    jLabelCalculo.setFont(new Font("Tahoma", Font.TRUETYPE_FONT, 20));
+                }else{
+                    if(contSaida < limiteDeTamanho){
+                        jLabelCalculo.setFont(new Font("Tahoma", Font.TRUETYPE_FONT, 14));
+                    }
+                }
+            }
+        }
+    }
+    
+    public void virgula(){
+        if(contSaida < limiteDeTamanho){
+            if(!virgula && !emOperacao){
+                char transferir[] = saida.toCharArray();
+                System.out.println(transferir[transferir.length-1]);
+                if(transferir.length-1 > 0){
+                    if(transferir[transferir.length-1] != ',' && transferir[transferir.length-1] != '+' && transferir[transferir.length-1] != '-' && transferir[transferir.length-1] != 'x' && transferir[transferir.length-1] != '÷' && transferir[transferir.length-1] != '^' && transferir[transferir.length-1] != '√'){
+                        saida += ",";
+                        atualizarResultado(saida);
+                        virgula = true;
+                    }
+                }else{
+                    if(transferir[transferir.length-1] != ',' && transferir[transferir.length-1] != '+' && transferir[transferir.length-1] != '-'){
+                        saida += ",";
+                        atualizarResultado(saida);
+                        virgula = true;
+                    }
+                }
+                contSaida++;
+            }
+            
+            tamanhodeCaracteres();
+        }
+    }
+    
+    public void operar(char operacao){
+        if(contSaida < limiteDeTamanho){
+            calculado();
+            if(emOperacao){
+                emOperacao = false;
+                char transferir[] = saida.toCharArray();
+                if(saida.contains("x-") || saida.contains("÷-") || saida.contains("^-") || saida.contains("√-")){
+                    saida = "";
+                    for(int i = 0; i < transferir.length - 2; i++){
+                        saida += transferir[i];
+                    }
+                    contSaida-= 2;
+                }else{
+                    saida = "";
+                    for(int i = 0; i < transferir.length - 1; i++){
+                        saida += transferir[i];
+                    }
+                    contSaida--;
+                }
+                
+                /*
+                if(saida.equals("-") || saida.equals("x") || saida.equals("÷")){
+                    saida = "";
+                    for(int i = 0; i < transferir.length - 1; i++){
+                        saida += transferir[i];
+                    }
+                    contSaida--;
+                }else{
+                    if(saida.contains(" x  - ") || saida.contains(" ÷  - ")){
+                        saida = "";
+                        for(int i = 0; i < transferir.length - 6; i++){
+                            saida += transferir[i];
+                        }
+                        contSaida-= 6;
+                    }else{
+                        saida = "";
+                        for(int i = 0; i < transferir.length - 3; i++){
+                            saida += transferir[i];
+                        }
+                        contSaida -= 3;
+                    }
+                }*/
+
+            }
+            
+            
+            if(saida.equals("0") || saida.equals("")){
+                switch(operacao){
+                    case '+':
+                        saida = "+";
+                        atualizarResultado(saida);
+                        emOperacao = true;
+                        virgula = false;
+                        tamanhodeCaracteres();
+                        break;
+                    case '-':
+                        saida = "-";
+                        atualizarResultado(saida);
+                        emOperacao = true;
+                        virgula = false;
+                        tamanhodeCaracteres();
+                        break;
+                    case '√':
+                        saida += "√";
+                        atualizarResultado(saida);
+                        emOperacao = true;
+                        virgula = false;
+                        tamanhodeCaracteres();
+                        break;
+                }
+            }else{
+                switch(operacao){
+                    case '+':
+                        saida+= "+";
+                        break;
+                    case '-':
+                        saida+= "-";
+                        break;
+                    case '×':
+                        saida+= "×";
+                        break;
+                    case '÷':
+                        saida+= "÷";
+                        break;
+                    case '^':
+                        saida+= '^';
+                        break;
+                    case '√':
+                        saida +="√";
+                        break;
+                }
+                contSaida++;
+                atualizarResultado(saida);
+                emOperacao = true;
+                virgula = false;
+                tamanhodeCaracteres();
+            }
+            
+        }
+    }
+    
+    public void clear(){
+        calculado();
+        saida = "0";
+        parenteAbre = 0;
+        parenteFecha = 0;
+        contSaida = 0;
+        tamanhodeCaracteres();
+        atualizarResultado(saida);
+    }
+    
+    public void apagar(){
+        calculado();
+        char caractere[] = saida.toCharArray();
+        boolean comVirgula = false; // Para saber se o número atual tem vírgula ou não
+        boolean comOperacao = false; // Para saber se o número atual tem vírgula ou não
+        saida = "";
+        
+        if(caractere[caractere.length-1] == '('){
+            parenteAbre--;
+        }else{
+            if(caractere[caractere.length-1] == ')'){
+                parenteFecha--;
+            }
+        }
+        if(caractere.length <= 1){
+            saida = "0";
+        }else{
+            for(int i = 0; i < caractere.length-1; i++){
+                if(caractere[i] == ','){
+                    comVirgula = true;
+                    if(caractere[i] == '+' || caractere[i] == '-' || caractere[i] == 'x' || caractere[i] == '÷'){
+                        comOperacao = true;
+                    }
+                    if(comVirgula){
+                        comOperacao = false;
+                    }
+                }
+                saida+= caractere[i];
+            }
+            contSaida--;
+        }
+        
+        if(emOperacao && (caractere[caractere.length-1] != 'x' || caractere[caractere.length-1] != '÷' || caractere[caractere.length-1] != '^')){
+            emOperacao = false;
+        }else{
+            if(virgula){
+                virgula = false;
+            }
+        }
+        
+        if(comVirgula){
+            if(!comOperacao){
+                virgula = true;
+            }
+        }
+        
+        atualizarResultado(saida);
+        tamanhodeCaracteres();
+    }
+    
+    public void teclar(java.awt.event.KeyEvent evt, String evento){
+        char e = evt.getKeyChar();
+        if(e == '~'){
+            operar('^');
+        }
+        if(evento.equals("KeyPressed")){
+            switch(e){
+                case '0':
+                    numero(0);
+                    jLabel10.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case '1':
+                    numero(1);
+                    jLabel11.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case '2':
+                    numero(2);
+                    jLabel12.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case '3':
+                    numero(3);
+                    jLabel13.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case '4':
+                    numero(4);
+                    jLabel14.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case '5':
+                    numero(5);
+                    jLabel15.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case '6':
+                    numero(6);
+                    jLabel16.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case '7':
+                    numero(7);
+                    jLabel17.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case '8':
+                    numero(8);
+                    jLabel18.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case '9':
+                    numero(9);
+                    jLabel19.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case '-':
+                    operar('-');
+                    jLabel1Menos.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case '+':
+                    operar('+');
+                    jLabel1Mais.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case '*':
+                    operar('×');
+                    jLabel1Vezes.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case '/':
+                    operar('÷');
+                    jLabel1Divisao.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case '~':
+                    operar('^');
+                    jLabel1Potencia.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case 'r':
+                    operar('√');
+                    jLabel1Raiz.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+            }
+            
+            switch(evt.getKeyCode()){
+                case KeyEvent.VK_BACK_SPACE:
+                    apagar();
+                    jLabel1Apagar.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    jLabel1Apagar.setVisible(true);
+                    break;
+                case KeyEvent.VK_ENTER:
+                    igual();
+                    jLabel1Igual.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case KeyEvent.VK_COMMA:
+                    virgula();
+                    jLabel1Virgula.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+                case KeyEvent.VK_ESCAPE:
+                    clear();
+                    jLabel1Clear.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+                    break;
+            }
+        }else{
+            if(evento.equals("KeyReleased")){
+                switch(e){
+                    case '0':
+                        jLabel10.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case '1':
+                        jLabel11.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case '2':
+                        jLabel12.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case '3':
+                        jLabel13.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case '4':
+                        jLabel14.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case '5':
+                        jLabel15.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case '6':
+                        jLabel16.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case '7':
+                        jLabel17.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case '8':
+                        jLabel18.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case '9':
+                        jLabel19.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case '-':
+                        jLabel1Menos.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case '+':
+                        jLabel1Mais.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case '*':
+                        jLabel1Vezes.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case '/':
+                        jLabel1Divisao.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case '~':
+                        jLabel1Potencia.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case 'r':
+                        jLabel1Raiz.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                }
+                
+                switch(evt.getKeyCode()){
+                    case KeyEvent.VK_BACK_SPACE:
+                        jLabel1Apagar.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        jLabel1Apagar.setVisible(false);
+                        break;
+                    case KeyEvent.VK_ENTER:
+                        jLabel1Igual.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case KeyEvent.VK_COMMA:
+                        jLabel1Virgula.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                    case KeyEvent.VK_ESCAPE:
+                        jLabel1Clear.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+                        break;
+                }
+            }
+        }
+    }
+    
+    public void igual(){
+        if(parenteAbre == parenteFecha){
+            calculado = true;
+            MathBrain = new Expressao(saida);
+            
+            try {
+                saida = MathBrain.resolverExpressao();
+                jLabelResultado.setText(saida);
+
+            } catch (Exception erro) {
+                JOptionPane.showMessageDialog(null, erro);
+            }
+
+            contSaida = saida.length();
+        }else{
+            JOptionPane.showMessageDialog(null, "Feche o(os) parentese(s)");
+        }
+        
+    }
+    
+    public void calculado(){
+        if(calculado){
+            calculado = false;
+            jLabelCalculo.setText(jLabelResultado.getText());
+            jLabelResultado.setText("");
+        }
+    }
+    
+    public void parenteses(int parente){
+        if(contSaida < limiteDeTamanho){
+            if(parente == 0){
+                saida += "(";
+                parenteAbre++;
+            }else{
+                if(parente == 1){
+                    saida += ")";
+                    parenteFecha++;
+                }
+            }
+            atualizarResultado(saida);
+        }
     }
 
     /**
@@ -26,10 +503,15 @@ public class TelaPrincipal extends javax.swing.JFrame {
      * WARNING: Do NOT modify this code. The content of this method is always
      * regenerated by the Form Editor.
      */
-    @SuppressWarnings("unchecked")
+    //@SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jLabelParentesesFecha = new javax.swing.JLabel();
+        jLabel1ParentesesFecha = new javax.swing.JLabel();
+        jLabelParentesesAbre = new javax.swing.JLabel();
+        jLabel1ParentesesAbre = new javax.swing.JLabel();
+        jLabelCalculo = new javax.swing.JLabel();
         jLabelResultado = new javax.swing.JLabel();
         jLabelApagar = new javax.swing.JLabel();
         jLabel1Apagar = new javax.swing.JLabel();
@@ -78,14 +560,93 @@ public class TelaPrincipal extends javax.swing.JFrame {
         setTitle("MathBrain");
         setMinimumSize(new java.awt.Dimension(285, 485));
         setResizable(false);
+        addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                formKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                formKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                formKeyTyped(evt);
+            }
+        });
         getContentPane().setLayout(null);
 
-        jLabelResultado.setFont(new java.awt.Font("Tahoma", 0, 36)); // NOI18N
-        jLabelResultado.setForeground(new java.awt.Color(51, 255, 255));
+        jLabelParentesesFecha.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        jLabelParentesesFecha.setForeground(new java.awt.Color(255, 255, 255));
+        jLabelParentesesFecha.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabelParentesesFecha.setText(")");
+        jLabelParentesesFecha.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabelParentesesFechaMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabelParentesesFechaMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                jLabelParentesesFechaMouseExited(evt);
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jLabelParentesesFechaMousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                jLabelParentesesFechaMouseReleased(evt);
+            }
+        });
+        getContentPane().add(jLabelParentesesFecha);
+        jLabelParentesesFecha.setBounds(70, 90, 50, 50);
+
+        jLabel1ParentesesFecha.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        jLabel1ParentesesFecha.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1ParentesesFecha.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1ParentesesFecha.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png"))); // NOI18N
+        getContentPane().add(jLabel1ParentesesFecha);
+        jLabel1ParentesesFecha.setBounds(70, 90, 50, 50);
+
+        jLabelParentesesAbre.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        jLabelParentesesAbre.setForeground(new java.awt.Color(255, 255, 255));
+        jLabelParentesesAbre.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabelParentesesAbre.setText("(");
+        jLabelParentesesAbre.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabelParentesesAbreMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabelParentesesAbreMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                jLabelParentesesAbreMouseExited(evt);
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jLabelParentesesAbreMousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                jLabelParentesesAbreMouseReleased(evt);
+            }
+        });
+        getContentPane().add(jLabelParentesesAbre);
+        jLabelParentesesAbre.setBounds(20, 90, 50, 50);
+
+        jLabel1ParentesesAbre.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        jLabel1ParentesesAbre.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1ParentesesAbre.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1ParentesesAbre.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png"))); // NOI18N
+        getContentPane().add(jLabel1ParentesesAbre);
+        jLabel1ParentesesAbre.setBounds(20, 90, 50, 50);
+
+        jLabelCalculo.setFont(new java.awt.Font("Tahoma", 0, 36)); // NOI18N
+        jLabelCalculo.setForeground(new java.awt.Color(51, 255, 255));
+        jLabelCalculo.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabelCalculo.setText("0");
+        getContentPane().add(jLabelCalculo);
+        jLabelCalculo.setBounds(10, 10, 250, 60);
+
+        jLabelResultado.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        jLabelResultado.setForeground(new java.awt.Color(51, 255, 0));
         jLabelResultado.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabelResultado.setText("0");
         getContentPane().add(jLabelResultado);
-        jLabelResultado.setBounds(10, 30, 240, 60);
+        jLabelResultado.setBounds(10, 50, 250, 50);
 
         jLabelApagar.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabelApagar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/jp/imagens/delet 1.png"))); // NOI18N
@@ -682,6 +1243,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabel0MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel0MouseClicked
         // TODO add your handling code here:
+        numero(0);
     }//GEN-LAST:event_jLabel0MouseClicked
 
     private void jLabel0MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel0MouseEntered
@@ -704,8 +1266,34 @@ public class TelaPrincipal extends javax.swing.JFrame {
         jLabel10.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Mouse.png")));
     }//GEN-LAST:event_jLabel0MouseReleased
 
+    private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
+        // TODO add your handling code here:
+        numero(1);
+    }//GEN-LAST:event_jLabel1MouseClicked
+
+    private void jLabel1MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseEntered
+        // TODO add your handling code here:
+        jLabel11.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Mouse.png")));
+    }//GEN-LAST:event_jLabel1MouseEntered
+
+    private void jLabel1MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseExited
+        // TODO add your handling code here:
+        jLabel11.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+    }//GEN-LAST:event_jLabel1MouseExited
+
+    private void jLabel1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MousePressed
+        // TODO add your handling code here:
+        jLabel11.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+    }//GEN-LAST:event_jLabel1MousePressed
+
+    private void jLabel1MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseReleased
+        // TODO add your handling code here:
+        jLabel11.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Mouse.png")));
+    }//GEN-LAST:event_jLabel1MouseReleased
+
     private void jLabel2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MouseClicked
         // TODO add your handling code here:
+        numero(2);
     }//GEN-LAST:event_jLabel2MouseClicked
 
     private void jLabel2MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MouseEntered
@@ -730,6 +1318,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabel3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel3MouseClicked
         // TODO add your handling code here:
+        numero(3);
     }//GEN-LAST:event_jLabel3MouseClicked
 
     private void jLabel3MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel3MouseEntered
@@ -754,6 +1343,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabel4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel4MouseClicked
         // TODO add your handling code here:
+        numero(4);
     }//GEN-LAST:event_jLabel4MouseClicked
 
     private void jLabel4MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel4MouseEntered
@@ -778,6 +1368,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabel5MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel5MouseClicked
         // TODO add your handling code here:
+        numero(5);
     }//GEN-LAST:event_jLabel5MouseClicked
 
     private void jLabel5MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel5MouseEntered
@@ -802,6 +1393,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabel6MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel6MouseClicked
         // TODO add your handling code here:
+        numero(6);
     }//GEN-LAST:event_jLabel6MouseClicked
 
     private void jLabel6MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel6MouseEntered
@@ -826,6 +1418,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabel7MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel7MouseClicked
         // TODO add your handling code here:
+        numero(7);
     }//GEN-LAST:event_jLabel7MouseClicked
 
     private void jLabel7MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel7MouseEntered
@@ -850,6 +1443,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabel8MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel8MouseClicked
         // TODO add your handling code here:
+        numero(8);
     }//GEN-LAST:event_jLabel8MouseClicked
 
     private void jLabel8MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel8MouseEntered
@@ -874,6 +1468,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabel9MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel9MouseClicked
         // TODO add your handling code here:
+        numero(9);
     }//GEN-LAST:event_jLabel9MouseClicked
 
     private void jLabel9MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel9MouseEntered
@@ -922,6 +1517,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabelIgualMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelIgualMouseClicked
         // TODO add your handling code here:
+       igual();
     }//GEN-LAST:event_jLabelIgualMouseClicked
 
     private void jLabelIgualMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelIgualMouseEntered
@@ -946,6 +1542,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabelMaisMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelMaisMouseClicked
         // TODO add your handling code here:
+        operar('+');
     }//GEN-LAST:event_jLabelMaisMouseClicked
 
     private void jLabelMaisMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelMaisMouseEntered
@@ -970,6 +1567,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabelMenosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelMenosMouseClicked
         // TODO add your handling code here:
+        operar('-');
     }//GEN-LAST:event_jLabelMenosMouseClicked
 
     private void jLabelMenosMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelMenosMouseEntered
@@ -994,6 +1592,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabelVezesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelVezesMouseClicked
         // TODO add your handling code here:
+        operar('×');
     }//GEN-LAST:event_jLabelVezesMouseClicked
 
     private void jLabelVezesMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelVezesMouseEntered
@@ -1018,6 +1617,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabelDivisaoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelDivisaoMouseClicked
         // TODO add your handling code here:
+        operar('÷');
     }//GEN-LAST:event_jLabelDivisaoMouseClicked
 
     private void jLabelDivisaoMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelDivisaoMouseEntered
@@ -1042,6 +1642,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabelClearMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelClearMouseClicked
         // TODO add your handling code here:
+        clear();
     }//GEN-LAST:event_jLabelClearMouseClicked
 
     private void jLabelClearMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelClearMouseEntered
@@ -1066,6 +1667,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabelPotenciaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelPotenciaMouseClicked
         // TODO add your handling code here:
+        operar('^');
     }//GEN-LAST:event_jLabelPotenciaMouseClicked
 
     private void jLabelPotenciaMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelPotenciaMouseEntered
@@ -1090,6 +1692,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabelRaizMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelRaizMouseClicked
         // TODO add your handling code here:
+        operar('√');
     }//GEN-LAST:event_jLabelRaizMouseClicked
 
     private void jLabelRaizMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelRaizMouseEntered
@@ -1114,6 +1717,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     private void jLabelApagarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelApagarMouseClicked
         // TODO add your handling code here:
+        apagar();
     }//GEN-LAST:event_jLabelApagarMouseClicked
 
     private void jLabelApagarMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelApagarMouseEntered
@@ -1137,29 +1741,71 @@ public class TelaPrincipal extends javax.swing.JFrame {
         jLabel1Apagar.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
     }//GEN-LAST:event_jLabelApagarMouseReleased
 
-    private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
+    private void formKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyTyped
         // TODO add your handling code here:
-    }//GEN-LAST:event_jLabel1MouseClicked
+        teclar(evt, "KeyTyped");
+    }//GEN-LAST:event_formKeyTyped
 
-    private void jLabel1MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseEntered
+    private void formKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyPressed
         // TODO add your handling code here:
-        jLabel11.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Mouse.png")));
-    }//GEN-LAST:event_jLabel1MouseEntered
+        teclar(evt, "KeyPressed");
+    }//GEN-LAST:event_formKeyPressed
 
-    private void jLabel1MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseExited
+    private void formKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyReleased
         // TODO add your handling code here:
-        jLabel11.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
-    }//GEN-LAST:event_jLabel1MouseExited
+        teclar(evt, "KeyReleased");
+    }//GEN-LAST:event_formKeyReleased
 
-    private void jLabel1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MousePressed
+    private void jLabelParentesesAbreMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelParentesesAbreMouseClicked
         // TODO add your handling code here:
-        jLabel11.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
-    }//GEN-LAST:event_jLabel1MousePressed
+        parenteses(0);
+    }//GEN-LAST:event_jLabelParentesesAbreMouseClicked
 
-    private void jLabel1MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseReleased
+    private void jLabelParentesesAbreMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelParentesesAbreMouseEntered
         // TODO add your handling code here:
-        jLabel11.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Mouse.png")));
-    }//GEN-LAST:event_jLabel1MouseReleased
+        jLabel1ParentesesAbre.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Mouse.png")));
+    }//GEN-LAST:event_jLabelParentesesAbreMouseEntered
+
+    private void jLabelParentesesAbreMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelParentesesAbreMouseExited
+        // TODO add your handling code here:
+        jLabel1ParentesesAbre.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+    }//GEN-LAST:event_jLabelParentesesAbreMouseExited
+
+    private void jLabelParentesesAbreMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelParentesesAbreMousePressed
+        // TODO add your handling code here:
+        jLabel1ParentesesAbre.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+    }//GEN-LAST:event_jLabelParentesesAbreMousePressed
+
+    private void jLabelParentesesAbreMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelParentesesAbreMouseReleased
+        // TODO add your handling code here:
+        jLabel1ParentesesAbre.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Mouse.png")));
+    }//GEN-LAST:event_jLabelParentesesAbreMouseReleased
+
+    private void jLabelParentesesFechaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelParentesesFechaMouseClicked
+        // TODO add your handling code here:
+        parenteses(1);
+    }//GEN-LAST:event_jLabelParentesesFechaMouseClicked
+
+    private void jLabelParentesesFechaMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelParentesesFechaMouseEntered
+        // TODO add your handling code here:
+        jLabel1ParentesesFecha.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Mouse.png")));
+    }//GEN-LAST:event_jLabelParentesesFechaMouseEntered
+
+    private void jLabelParentesesFechaMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelParentesesFechaMouseExited
+        // TODO add your handling code here:
+        jLabel1ParentesesFecha.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Normal.png")));
+    }//GEN-LAST:event_jLabelParentesesFechaMouseExited
+
+    private void jLabelParentesesFechaMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelParentesesFechaMousePressed
+        // TODO add your handling code here:
+        jLabel1ParentesesFecha.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
+    }//GEN-LAST:event_jLabelParentesesFechaMousePressed
+
+    private void jLabelParentesesFechaMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelParentesesFechaMouseReleased
+        // TODO add your handling code here:
+        jLabel1ParentesesFecha.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Mouse.png")));
+    }//GEN-LAST:event_jLabelParentesesFechaMouseReleased
+
 
     /**
      * @param args the command line arguments
@@ -1215,6 +1861,8 @@ public class TelaPrincipal extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1Igual;
     private javax.swing.JLabel jLabel1Mais;
     private javax.swing.JLabel jLabel1Menos;
+    private javax.swing.JLabel jLabel1ParentesesAbre;
+    private javax.swing.JLabel jLabel1ParentesesFecha;
     private javax.swing.JLabel jLabel1Potencia;
     private javax.swing.JLabel jLabel1Raiz;
     private javax.swing.JLabel jLabel1Vezes;
@@ -1228,12 +1876,15 @@ public class TelaPrincipal extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelApagar;
+    private javax.swing.JLabel jLabelCalculo;
     private javax.swing.JLabel jLabelClear;
     private javax.swing.JLabel jLabelDivisao;
     private javax.swing.JLabel jLabelFundo;
     private javax.swing.JLabel jLabelIgual;
     private javax.swing.JLabel jLabelMais;
     private javax.swing.JLabel jLabelMenos;
+    private javax.swing.JLabel jLabelParentesesAbre;
+    private javax.swing.JLabel jLabelParentesesFecha;
     private javax.swing.JLabel jLabelPotencia;
     private javax.swing.JLabel jLabelRaiz;
     private javax.swing.JLabel jLabelResultado;
