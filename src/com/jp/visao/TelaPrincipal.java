@@ -8,6 +8,8 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import javax.swing.ImageIcon;
+import java.awt.*;
+import java.awt.datatransfer.*;
 
 /**
  *
@@ -22,17 +24,19 @@ public class TelaPrincipal extends javax.swing.JFrame {
     boolean emOperacao = false; // Para saber se está em operação no momento
     boolean virgula = false; // Para saber se já foi clicado na vírgula
     boolean calculado = false;
+    boolean parente = false;
     String saida = "0"; // Para contar quantos caracteres de número tem na string
     int contSaida = 0;
-    int limiteDeTamanho = 25;
+    int limiteDeTamanho = 20;
     Expressao MathBrain = null;
     int parenteAbre = 0;
     int parenteFecha = 0;
     Erro JanelaErro = new Erro();
+    Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
     
     public TelaPrincipal() {
-        initComponents();
         this.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/com/jp/imagens/icone_calculadora.png")));
+        initComponents();
         this.setLocationRelativeTo(null);
         jLabel1Apagar.setVisible(false);
     }
@@ -80,20 +84,39 @@ public class TelaPrincipal extends javax.swing.JFrame {
                         break;
                 }
             }else{
-                saida += numero;
+                if(parente && saida.endsWith(")")){
+                    saida += "×" +numero;
+                    contSaida++;
+                }
+                else saida += numero;
             }
             atualizarResultado(saida);
             emOperacao = false;
+            parente = false;
             contSaida++;
+            
+            calcular();
+            jLabelCalculo.setForeground(new Color(51,255,255));
         }
         tamanhodeCaracteres();
+    }
+    
+    public void calcular(){
+        if(saida.contains("+") || saida.contains("-") || saida.contains("×") || saida.contains("÷") || saida.contains("^") || saida.contains("√")){
+            MathBrain = new Expressao(saida.replace(",", "."));
+            try {
+                jLabelResultado.setText(MathBrain.resolverExpressao().replace(".", ","));
+            } catch (Exception e) {
+                jLabelResultado.setText("");
+            }
+        }
     }
     
     public void tamanhodeCaracteres(){
         if(contSaida < 8){
             jLabelCalculo.setFont(new Font("Tahoma", Font.TRUETYPE_FONT, 36));
         }else{
-            if(contSaida < 15){
+            if(contSaida < 14){
                 jLabelCalculo.setFont(new Font("Tahoma", Font.TRUETYPE_FONT, 28));
             }else{
                 if(contSaida < limiteDeTamanho){
@@ -105,10 +128,10 @@ public class TelaPrincipal extends javax.swing.JFrame {
     
     public void virgula(){
         if(contSaida < limiteDeTamanho){
-            if(!virgula && !emOperacao){
+            if(!virgula && !emOperacao && !parente){
                 char transferir[] = saida.toCharArray();
                 if(transferir.length-1 > 0){
-                    if(transferir[transferir.length-1] != ',' && transferir[transferir.length-1] != '+' && transferir[transferir.length-1] != '-' && transferir[transferir.length-1] != 'x' && transferir[transferir.length-1] != '÷' && transferir[transferir.length-1] != '^' && transferir[transferir.length-1] != '√'){
+                    if(eNumero(transferir[transferir.length-1]) && transferir[transferir.length-1] != ',' && transferir[transferir.length-1] != '(' && transferir[transferir.length-1] != ')'){
                         saida += ",";
                         atualizarResultado(saida);
                         virgula = true;
@@ -122,7 +145,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
                 }
                 contSaida++;
             }
-            
+            jLabelCalculo.setForeground(new Color(51,255,255));
             tamanhodeCaracteres();
         }
     }
@@ -199,6 +222,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
                         break;
                     case '√':
                         saida = "2√";
+                        contSaida++;
                         atualizarResultado(saida);
                         emOperacao = true;
                         virgula = false;
@@ -231,6 +255,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
                 emOperacao = true;
                 virgula = false;
                 tamanhodeCaracteres();
+                jLabelCalculo.setForeground(new Color(51,255,255));
             }
             
         }
@@ -242,8 +267,12 @@ public class TelaPrincipal extends javax.swing.JFrame {
         parenteAbre = 0;
         parenteFecha = 0;
         contSaida = 0;
+        virgula = false;
+        emOperacao = false;
         tamanhodeCaracteres();
         atualizarResultado(saida);
+        jLabelResultado.setText("");
+        jLabelCalculo.setForeground(new Color(51,255,255));
     }
     
     public void apagar(){
@@ -266,20 +295,24 @@ public class TelaPrincipal extends javax.swing.JFrame {
             for(int i = 0; i < caractere.length-1; i++){
                 if(caractere[i] == ','){
                     comVirgula = true;
-                    if(caractere[i] == '+' || caractere[i] == '-' || caractere[i] == 'x' || caractere[i] == '÷'){
-                        comOperacao = true;
-                    }
                     
-                    if(comVirgula){
+                    if(comOperacao){
                         comOperacao = false;
                     }
+                }else{
+                    if(!eNumero(caractere[i]) && caractere[i] != '(' && caractere[i] != ')'){
+                        comOperacao = true;
+                        comVirgula = false;
+                    }
                 }
+                
+                
                 saida+= caractere[i];
             }
             contSaida--;
         }
         
-        if(emOperacao && (caractere[caractere.length-1] != 'x' || caractere[caractere.length-1] != '÷' || caractere[caractere.length-1] != '^')){
+        if(emOperacao && !eNumero(caractere[caractere.length-1]) &&(caractere[caractere.length-1] != '(' || caractere[caractere.length-1] != ')' || caractere[caractere.length-1] != '^')){
             emOperacao = false;
         }else{
             if(virgula){
@@ -287,13 +320,22 @@ public class TelaPrincipal extends javax.swing.JFrame {
             }
         }
         
-        if(comVirgula){
-            if(!comOperacao){
-                virgula = true;
-            }
+        if(saida.endsWith("(") || saida.endsWith(")")){
+            parente = true;
         }
+        
+        if(comVirgula){
+            virgula = true;
+        }
+        
+        if(comOperacao){
+            emOperacao = true;
+        }
+        
         atualizarResultado(saida);
         tamanhodeCaracteres();
+        calcular();
+        jLabelCalculo.setForeground(new Color(51,255,255));
     }
     
     public void teclar(java.awt.event.KeyEvent evt, String evento){
@@ -318,6 +360,10 @@ public class TelaPrincipal extends javax.swing.JFrame {
                     clear();
                     jLabel1Clear.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/clique.png")));
                     break;
+                case KeyEvent.VK_CONTROL:
+                case KeyEvent.VK_C:
+                    StringSelection ss = new StringSelection (jLabelCalculo.getText());
+                    clip.setContents (ss, ss);
             }
             
             switch(e){
@@ -481,11 +527,14 @@ public class TelaPrincipal extends javax.swing.JFrame {
                     MathBrain = new Expressao(saida);
 
                     try {
-                        saida = MathBrain.resolverExpressao();
-                        jLabelResultado.setText(saida.replace(".", ","));
+                        saida = MathBrain.resolverExpressao().replace(".", ",");
+                        jLabelResultado.setText(saida);
+                        calculado();
 
                     } catch (Exception erro) {
-                        JanelaErro.setarErro("" + erro.toString().replace("java.lang.Exception: ", "").replace("java.lang.NumberFormatException: empty String", "André Corrige"));
+                        calculado();
+                        jLabelCalculo.setForeground(new Color(255,51,51));
+                        JanelaErro.setarErro("" + erro.toString().replace("java.lang.Exception: ", "").replace("java.lang.NumberFormatException: empty String", "Revise sua formatação."));
                         //JOptionPane.showMessageDialog(null, erro);
                         saida = saida.replace(".", ",");
                         atualizarResultado(saida);
@@ -514,15 +563,17 @@ public class TelaPrincipal extends javax.swing.JFrame {
     
     public void calculado(){
         if(calculado){
-            calculado = false;
             jLabelCalculo.setText(jLabelResultado.getText());
+            jLabelCalculo.setForeground(new Color(51,255,51));
             jLabelResultado.setText("");
+            calculado = false;
         }
     }
     
     public void parenteses(int parente){
         calculado();
         if(contSaida < limiteDeTamanho){
+            this.parente = true;
             if(saida.equals("0")){
                 switch(parente){
                     case 0:
@@ -533,16 +584,19 @@ public class TelaPrincipal extends javax.swing.JFrame {
             }else{
                 switch(parente){
                     case 0:
-                        saida += "(";
+                        if(emOperacao) saida += "(";
+                        else saida += "×(";
                         parenteAbre++;
                         break;
                     case 1:
                         saida += ")";
+                        calcular();
                         parenteFecha++;
+                        virgula = false;
                         break;
                 }
             }
-            
+            jLabelCalculo.setForeground(new Color(51,255,255));
             atualizarResultado(saida);
         }
     }
@@ -699,7 +753,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
         jLabelCalculo.setBounds(10, 10, 250, 60);
 
         jLabelResultado.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
-        jLabelResultado.setForeground(new java.awt.Color(51, 255, 0));
+        jLabelResultado.setForeground(new java.awt.Color(204, 204, 204));
         jLabelResultado.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         getContentPane().add(jLabelResultado);
         jLabelResultado.setBounds(10, 50, 250, 50);
@@ -1862,7 +1916,6 @@ public class TelaPrincipal extends javax.swing.JFrame {
         // TODO add your handling code here:
         jLabel1ParentesesFecha.setIcon(new ImageIcon(getClass().getResource("/com/jp/imagens/Mouse.png")));
     }//GEN-LAST:event_jLabelParentesesFechaMouseReleased
-
 
     /**
      * @param args the command line arguments

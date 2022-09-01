@@ -5,16 +5,17 @@
 package com.jp.modelos;
 //import javax.swing.JOptionPane;
 
+
 /**
  *
  * @author aluno
  */
 public class Expressao {
     private String expressao = "";//Recebe a expressão que vem da tela
-    private String[] vetor = new String[20];//recebe a expressão dividida
-    private int[] parentesesAberto = new int[20];//Guarda os indices em que os parenteses abertos estão
+    private String[] vetor = new String[30];//recebe a expressão dividida
+    private int[] parentesesAberto = new int[30];//Guarda os indices em que os parenteses abertos estão
     private int indParAbr = -1;//Controla qual indice do vetor acima está sendo usado
-    private int[] parentesesFechado = new int[20];
+    private int[] parentesesFechado = new int[30];
     private int indParFec = -1;
     private int indice = 0;//guarda o indice final que foi usado pela expressão após ser dividida no vetor
     
@@ -29,12 +30,12 @@ public class Expressao {
         this.expressao = expressao;
     }
     
-    private void gerarVetor(){//primeiro divide a expressão no vetor
+    private void gerarVetor(){//metodo que divide a expressão no vetor
         indice = 0;
         indParAbr= -1;
         indParFec=-1;
         char vetorChar[] = this.expressao.toCharArray();//transforma a String que vem da tela em um vetor de Chars
-        for(int i = 0; i < 20; i++){//coloca elementos nulos em todos os indices dos vetores que vão ser usados
+        for(int i = 0; i < vetor.length; i++){//coloca elementos nulos em todos os indices dos vetores que vão ser usados
             vetor[i] = "";
             parentesesAberto[i] = -1;
             parentesesFechado[i] = -1;
@@ -54,7 +55,7 @@ public class Expressao {
                         indice++;
                     }else{
                         if(vetorChar[i] == '-'){//garante que o numero que vem depois seja guardado como negativo nem precisar guardar o "-" em um indice separado
-                            if(indice == 0 || vetorChar[i-1] == '×' || vetorChar[i-1] == '÷' || vetorChar[i-1] == '^' || vetorChar[i-1] == '√' ||  vetorChar[i-1] == '(' ||  vetorChar[i-1] == ')') this.vetor[indice] = "-";
+                            if(i == 0 || vetorChar[i-1] == '×' || vetorChar[i-1] == '÷' || vetorChar[i-1] == '^' || vetorChar[i-1] == '√' ||  vetorChar[i-1] == '(' ||  vetorChar[i-1] == ')') this.vetor[indice] = "-";
                             else{
                                 indice++;
                                 this.vetor[indice] = "-";
@@ -80,7 +81,6 @@ public class Expressao {
                      aux = vetor[i+1];
                      vetor[i+1] = vetor[i-1];
                      vetor[i-1] = aux;
-                     //JOptionPane.showMessageDialog(null, vetor[i+1] + " - "+ vetor[i-1] + " - " + vetor[i]);
                 }else{
                     vetor[i-1] = Math.pow(Float.parseFloat(vetor[i-1]),(Float.parseFloat(vetor[i+1]))) + "";
                     vetor[i+1] = "1";
@@ -89,7 +89,6 @@ public class Expressao {
                 }
             }
             if(vetor[i].equals("√")){
-                    //JOptionPane.showMessageDialog(null, "Entrei aqui");
                     if(Float.parseFloat(vetor[i+1]) < 0 && Float.parseFloat(vetor[i-1])== (int)(Float.parseFloat(vetor[i-1])) && Integer.parseInt(vetor[i-1])%2 != 0){ 
                         vetor[i+1] = (Float.parseFloat(vetor[i+1]))*-1 + "";
                         vetor[i-1] = (Math.pow(Float.parseFloat(vetor[i+1]),(1/(Float.parseFloat(vetor[i-1])))))*-1 + "";
@@ -107,7 +106,7 @@ public class Expressao {
                                 vetor[i+1] = "1";
                                 vetor[i] = "×";
                                 i += 1;
-                                }else throw new Exception("Erro!! revise sua formatação");
+                                }else throw new Exception("Erro!! Operação inválida");
                         }else{
                             vetor[i-1] = Math.pow(Float.parseFloat(vetor[i+1]),(1/(Float.parseFloat(vetor[i-1])))) + "";
                             vetor[i+1] = "1";
@@ -180,9 +179,19 @@ public class Expressao {
         if(resultado == (int) resultado){
             saida = (int) (resultado) + "";
         }else{
-            saida = resultado + "";
+            saida = String.format("%.5f", resultado);
+            char limpa[] = saida.toCharArray();
+            int i = limpa.length-1;
+            saida = "";
+            while(i >= 0){
+                if(limpa[i] == '0' && saida.equals(""));
+                else{
+                    saida = limpa[i] + saida;
+                }
+                i--;
+            }
         }
-        if(saida.equals("Infinity") || saida.equals("NaN")) throw new Exception("Erro!! revise sua formatação");
+        if(saida.equals("Infinity") || saida.equals("NaN")) throw new Exception("Erro!! Operação inválida");
         return(saida);
     }
 }
