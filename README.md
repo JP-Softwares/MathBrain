@@ -1,3 +1,3 @@
 # MathBrain
-Remaking the Calculator
-[MathBrain.jar](https://github.com/Geydson-Santos/MathBrain/tree/main/dist/MathBrain.jar)
+Remaking the Calculator <br>
+Download: [MathBrain.jar](https://github.com/Geydson-Santos/MathBrain/tree/main/dist/MathBrain.jar)
