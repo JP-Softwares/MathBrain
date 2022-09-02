@@ -18,6 +18,7 @@ public class Erro extends javax.swing.JFrame {
     /**
      * Creates new form Erro
      */
+    TelaPrincipal tela = null;
     public Erro() {
         initComponents();
         this.setLocationRelativeTo(null);

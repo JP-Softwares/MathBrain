@@ -597,17 +597,26 @@ public class TelaPrincipal extends javax.swing.JFrame {
                 switch(parente){
                     case 0:
                         if(emOperacao) saida += "(";
-                        else saida += "×(";
+                        else {
+                            saida += "×(";
+                            contSaida++;
+                        }
                         parenteAbre++;
                         break;
                     case 1:
-                        saida += ")";
-                        calcular();
-                        parenteFecha++;
-                        virgula = false;
+                        if(parenteAbre <= parenteFecha){
+                            JanelaErro.setarErro("Abra um parenteses primeiro.");
+                        }else{
+                            saida += ")";
+                            calcular();
+                            parenteFecha++;
+                            virgula = false;
+                        }
                         break;
                 }
             }
+            contSaida++;
+            tamanhodeCaracteres();
             jLabelCalculo.setForeground(new Color(51,255,255));
             atualizarResultado(saida);
         }
