@@ -40,29 +40,29 @@ public class Expressao {
             parentesesAberto[i] = -1;
             parentesesFechado[i] = -1;
         }
-        for(int i = 0; i < vetorChar.length; i++){
-            if(vetorChar[i] =='('){
-                indParAbr++;
-                parentesesAberto[indParAbr] = indice;//guarda o indice em que o parenteses começa no indice decidido pelo indParAbr
+        for(int i = 0; i < vetorChar.length; i++){//percorre todo o vetor de Chars criado analisando cada caractere
+            if(vetorChar[i] =='('){//caso o Char no indice "i" do vetor de Chars seja um "(" eu guardo no vetor relacionado o valor numerico do indice "i"
+                indParAbr++;//variavel usada para percorrer os indices dos vetor de parenteses abertos e para ter controle de em que indice do vetor de parenteses abertos esta a informação sobre o ultimo parenteses aberto
+                parentesesAberto[indParAbr] = indice;//guarda o indice em que o parenteses foi aberto no indice "indParAbr" do vetor de parenteses abertos
             }else{
                 if(vetorChar[i] ==')'){
                     indParFec++;
                     parentesesFechado[indParFec] = indice;
                 }else{
-                    if(vetorChar[i] == '×' || vetorChar[i] == '÷' || vetorChar[i] == '^' || vetorChar[i] == '√'){//caso seja encontrada alguma operação que deve ser inserida no vetor
+                    if(vetorChar[i] == '×' || vetorChar[i] == '÷' || vetorChar[i] == '^' || vetorChar[i] == '√'){//caso seja encontrada alguma dessas operações, eu guardo ela no proximo indice e pulo mais um para esperar o proximo input
                         indice++;
                         this.vetor[indice] = vetorChar[i] + "";
                         indice++;
                     }else{
-                        if(vetorChar[i] == '-'){//garante que o numero que vem depois seja guardado como negativo nem precisar guardar o "-" em um indice separado
-                            if(i == 0 || vetorChar[i-1] == '×' || vetorChar[i-1] == '÷' || vetorChar[i-1] == '^' || vetorChar[i-1] == '√' ||  vetorChar[i-1] == '(' ||  vetorChar[i-1] == ')') this.vetor[indice] = "-";
-                            else{
+                        if(vetorChar[i] == '-'){//garante que o numero que vem depois seja guardado como negativo sem precisar guardar o "-" em um indice separado
+                            if(i == 0 || vetorChar[i-1] == '×' || vetorChar[i-1] == '÷' || vetorChar[i-1] == '^' || vetorChar[i-1] == '√' ||  vetorChar[i-1] == '(' ||  vetorChar[i-1] == ')') this.vetor[indice] = "-";//caso o menos venha após uma dessas operações, o indice atual ja está vazio
+                            else{//caso o caractere anterior não seja uma das expressões eu preciso ir para o proximo indice e fazer com que o valor digitado após seja negativo
                                 indice++;
                                 this.vetor[indice] = "-";
                             }
                         }else{
                             if(vetorChar[i] == '+') indice++;//apenas separa os numeros digitados antes e depois do "+"
-                            else this.vetor[indice] += vetorChar[i];
+                            else this.vetor[indice] += vetorChar[i];//caso seja digitado um numero, ele apenas é guardado no indice atual
                         }
                     }
                 }   
@@ -72,43 +72,43 @@ public class Expressao {
     }
     
     
-    private void resolverOperacao(int indiceInicial, int indiceFinal)throws Exception {
+    private void resolverOperacao(int indiceInicial, int indiceFinal)throws Exception {//
         for(int i = indiceFinal; i >= indiceInicial; i--){
             if(vetor[i].equals("^")){
-                if(Float.parseFloat(vetor[i+1]) < 1 && Float.parseFloat(vetor[i+1]) > 0 && Float.parseFloat(vetor[i-1]) < 0){//caso a operação seja semelhante a raiz de um numero negativo ela é enviada ao calculo de raiz para melhor tratamento
+                if(Double.parseDouble(vetor[i+1]) < 1 && Double.parseDouble(vetor[i+1]) > 0 && Double.parseDouble(vetor[i-1]) < 0){//caso a operação seja semelhante a raiz de um numero negativo ela é enviada ao calculo de raiz para melhor tratamento
                      vetor[i] = "√";
                      String aux = "";
                      aux = vetor[i+1];
                      vetor[i+1] = vetor[i-1];
                      vetor[i-1] = aux;
                 }else{
-                    vetor[i-1] = Math.pow(Float.parseFloat(vetor[i-1]),(Float.parseFloat(vetor[i+1]))) + "";
+                    vetor[i-1] = Math.pow(Double.parseDouble(vetor[i-1]),(Double.parseDouble(vetor[i+1]))) + "";
                     vetor[i+1] = "1";
                     vetor[i] = "×";
                     i += 1;
                 }
             }
             if(vetor[i].equals("√")){
-                    if(Float.parseFloat(vetor[i+1]) < 0 && Float.parseFloat(vetor[i-1])== (int)(Float.parseFloat(vetor[i-1])) && Integer.parseInt(vetor[i-1])%2 != 0){ 
-                        vetor[i+1] = (Float.parseFloat(vetor[i+1]))*-1 + "";
-                        vetor[i-1] = (Math.pow(Float.parseFloat(vetor[i+1]),(1/(Float.parseFloat(vetor[i-1])))))*-1 + "";
+                    if(Double.parseDouble(vetor[i+1]) < 0 && Double.parseDouble(vetor[i-1])== (int)(Double.parseDouble(vetor[i-1])) && Integer.parseInt(vetor[i-1])%2 != 0){ 
+                        vetor[i+1] = (Double.parseDouble(vetor[i+1]))*-1 + "";
+                        vetor[i-1] = (Math.pow(Double.parseDouble(vetor[i+1]),(1/(Double.parseDouble(vetor[i-1])))))*-1 + "";
                         vetor[i+1] = "1";
                         vetor[i] = "×";
                         i += 1;
                     }else{  
-                        if(Float.parseFloat(vetor[i-1]) < 1 && Float.parseFloat(vetor[i-1]) > 0 && Float.parseFloat(vetor[i+1]) < 0){
-                                float x = 1.0f/Float.parseFloat(vetor[i-1]);
+                        if(Double.parseDouble(vetor[i-1]) < 1 && Double.parseDouble(vetor[i-1]) > 0 && Double.parseDouble(vetor[i+1]) < 0){
+                                double x = 1.0f/Double.parseDouble(vetor[i-1]);
                                 int y = (int)(x) % 2;
                                 boolean teste = x == Math.round(x);
                                 if(teste && y > 0){
-                                vetor[i+1] = Float.parseFloat(vetor[i+1])*-1 + "";
-                                vetor[i-1] = (Math.pow(Float.parseFloat(vetor[i+1]),(Float.parseFloat(vetor[i-1]))))*-1 + "";
+                                vetor[i+1] = Double.parseDouble(vetor[i+1])*-1 + "";
+                                vetor[i-1] = (Math.pow(Double.parseDouble(vetor[i+1]),(Double.parseDouble(vetor[i-1]))))*-1 + "";
                                 vetor[i+1] = "1";
                                 vetor[i] = "×";
                                 i += 1;
                                 }else throw new Exception("Erro!! Operação inválida");
                         }else{
-                            vetor[i-1] = Math.pow(Float.parseFloat(vetor[i+1]),(1/(Float.parseFloat(vetor[i-1])))) + "";
+                            vetor[i-1] = Math.pow(Double.parseDouble(vetor[i+1]),(1/(Double.parseDouble(vetor[i-1])))) + "";
                             vetor[i+1] = "1";
                             vetor[i] = "×";
                             i += 1;
@@ -119,13 +119,13 @@ public class Expressao {
         }
         for( int i = indiceInicial; i < indiceFinal; i++){
                 if(vetor[i].equals("×")){
-                    vetor[i+1] = (Float.parseFloat(vetor[i-1])*(Float.parseFloat(vetor[i+1]))) + "";
+                    vetor[i+1] = (Double.parseDouble(vetor[i-1])*(Double.parseDouble(vetor[i+1]))) + "";
                     vetor[i-1] = "0";
                     vetor[i] = "0";
                     i += 1;
                 }else{
                     if(vetor[i].equals("÷")){
-                    vetor[i+1] = (Float.parseFloat(vetor[i-1])/(Float.parseFloat(vetor[i+1]))) + "";
+                    vetor[i+1] = (Double.parseDouble(vetor[i-1])/(Double.parseDouble(vetor[i+1]))) + "";
                     vetor[i-1] = "0";
                     vetor[i] = "0";
                     i += 1;
@@ -134,16 +134,18 @@ public class Expressao {
         }
         double resultado = 0;
         for(int i = indiceInicial; i<= indiceFinal; i++){//guarda o resultado da operação em uma variavel e zera todos os outros
-            resultado += Float.parseFloat(vetor[i]);
+            resultado += Double.parseDouble(vetor[i]);
             vetor[i] = "0";
         }
         vetor[indiceInicial] = resultado + "";//guarda o resultado dentro do primeiro indice usado na operação
         int diferenca = 0;
         diferenca = indiceFinal - indiceInicial;
-        for(int i = indiceFinal+1 ; i <= indice; i++){//puxa todos os indices depois da operação escolhida pra esquerda de acordo com a quantidade de indices que foram limpos
-            vetor[i-diferenca] = vetor[i];
-            vetor [i] = "0";
-        } 
+        if(diferenca != 0){
+            for(int i = indiceFinal+1 ; i <= indice; i++){//puxa todos os indices depois da operação escolhida pra esquerda de acordo com a quantidade de indices que foram limpos
+                vetor[i-diferenca] = vetor[i];
+                vetor [i] = "0";
+            } 
+        }
         for(int j = 0; j <= indice; j++ ){//reorganiza os parenteses para que continuem no local certo caso o indice refenciado seja puxado para a esquerda
             if(parentesesAberto[j] > indiceFinal){
                 parentesesAberto[j] += diferenca*-1;
@@ -173,24 +175,26 @@ public class Expressao {
         resolverOperacao(0, indice);
         double resultado = 0;
         for(int i = 0; i<= indice; i++){
-            resultado += Float.parseFloat(vetor[i]);
+            resultado += Double.parseDouble(vetor[i]);
         }
         String saida = "";
         if(resultado == (int) resultado){
             saida = (int) (resultado) + "";
         }else{
-            saida = String.format("%.5f", resultado);
+            saida = String.format("%.7f", resultado);
+            saida = saida.replace(",", ".");
             char limpa[] = saida.toCharArray();
             int i = limpa.length-1;
             saida = "";
             while(i >= 0){
-                if(limpa[i] == '0' && saida.equals(""));
+                if((limpa[i] == '0' || limpa[i] == '.' ) && saida.equals(""));
                 else{
                     saida = limpa[i] + saida;
                 }
                 i--;
             }
         }
+        if(saida.equals("")) saida = "0";
         if(saida.equals("Infinity") || saida.equals("NaN")) throw new Exception("Erro!! Operação inválida");
         return(saida);
     }

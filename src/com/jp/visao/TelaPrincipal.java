@@ -27,7 +27,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
     boolean parente = false;
     String saida = "0"; // Para contar quantos caracteres de número tem na string
     int contSaida = 0;
-    int limiteDeTamanho = 20;
+    int limiteDeTamanho = 18;
     Expressao MathBrain = null;
     int parenteAbre = 0;
     int parenteFecha = 0;
@@ -114,13 +114,17 @@ public class TelaPrincipal extends javax.swing.JFrame {
     
     public void tamanhodeCaracteres(){
         if(contSaida < 8){
-            jLabelCalculo.setFont(new Font("Tahoma", Font.TRUETYPE_FONT, 36));
+            jLabelCalculo.setFont(new Font("Tahoma", Font.TRUETYPE_FONT, 48));
         }else{
-            if(contSaida < 14){
-                jLabelCalculo.setFont(new Font("Tahoma", Font.TRUETYPE_FONT, 28));
+            if(contSaida < 12){
+                jLabelCalculo.setFont(new Font("Tahoma", Font.TRUETYPE_FONT, 36));
             }else{
-                if(contSaida < limiteDeTamanho){
-                    jLabelCalculo.setFont(new Font("Tahoma", Font.TRUETYPE_FONT, 20));
+                if(contSaida < 15){
+                    jLabelCalculo.setFont(new Font("Tahoma", Font.TRUETYPE_FONT, 28));
+                }else{
+                    if(contSaida < limiteDeTamanho){
+                        jLabelCalculo.setFont(new Font("Tahoma", Font.TRUETYPE_FONT, 20));
+                    }
                 }
             }
         }
@@ -156,24 +160,35 @@ public class TelaPrincipal extends javax.swing.JFrame {
             if(emOperacao){
                 emOperacao = false;
                 char transferir[] = saida.toCharArray();
-                if(saida.contains("x-") || saida.contains("÷-") || saida.contains("^-") || saida.contains("√-")){
-                    saida = "";
-                    for(int i = 0; i < transferir.length - 2; i++){
-                        saida += transferir[i];
+                if(saida.endsWith("×-") || saida.endsWith("÷-") || saida.endsWith("^-") || saida.endsWith("2√")){
+                    if(saida.endsWith("×2√") || saida.endsWith("÷2√")|| saida.endsWith("^2√")){
+                        saida = "";
+                        for(int i = 0; i < transferir.length - 3; i++){
+                            saida += transferir[i];
+                        }
+                        contSaida-= 3;
+                    }else{
+                        if(!saida.equals("2√")){
+                            saida = "";
+                            for(int i = 0; i < transferir.length - 2; i++){
+                                saida += transferir[i];
+                            }
+                            contSaida-= 2;
+                        }
                     }
-                    contSaida-= 2;
                 }else{
-                    if(operacao != '-' && operacao != '√'){
+                    if((operacao != '√') && (operacao != '-' || transferir[transferir.length-1] == '-' || transferir[transferir.length-1] == '+')){
                         saida = "";
                         for(int i = 0; i < transferir.length - 1; i++){
                             saida += transferir[i];
                         }
                         contSaida--;
-                        
-                    }else{
-                        if(operacao == '√' && !eNumero(transferir[transferir.length-1])){
-                            saida += 2;
-                        }
+                    }
+                    
+                    
+                    if(operacao == '√' && transferir[transferir.length-1] != '√'){
+                        saida += 2;
+                        contSaida++;
                     }
                     
                 }
@@ -222,7 +237,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
                         break;
                     case '√':
                         saida = "2√";
-                        contSaida++;
+                        contSaida = 2;
                         atualizarResultado(saida);
                         emOperacao = true;
                         virgula = false;
@@ -238,16 +253,17 @@ public class TelaPrincipal extends javax.swing.JFrame {
                         saida+= "-";
                         break;
                     case '×':
-                        saida+= "×";
+                        if(!saida.endsWith("√")) saida+= "×";
                         break;
                     case '÷':
-                        saida+= "÷";
+                        if(!saida.endsWith("√")) saida+= "÷";
                         break;
                     case '^':
-                        saida+= '^';
+                        if(!saida.endsWith("√")) saida+= '^';
                         break;
                     case '√':
-                        saida +="√";
+                        if(!saida.endsWith("√")) saida +="√";
+                        else contSaida--;
                         break;
                 }
                 contSaida++;
@@ -305,18 +321,18 @@ public class TelaPrincipal extends javax.swing.JFrame {
                         comVirgula = false;
                     }
                 }
-                
-                
                 saida+= caractere[i];
             }
             contSaida--;
-        }
-        
-        if(emOperacao && !eNumero(caractere[caractere.length-1]) &&(caractere[caractere.length-1] != '(' || caractere[caractere.length-1] != ')' || caractere[caractere.length-1] != '^')){
-            emOperacao = false;
-        }else{
-            if(virgula){
-                virgula = false;
+            
+            
+            if(eOperacao(caractere[caractere.length-2])){
+                emOperacao = true;
+            }else{
+                emOperacao = false;
+                if(virgula && !comVirgula){
+                    virgula = false;
+                }
             }
         }
         
@@ -326,10 +342,6 @@ public class TelaPrincipal extends javax.swing.JFrame {
         
         if(comVirgula){
             virgula = true;
-        }
-        
-        if(comOperacao){
-            emOperacao = true;
         }
         
         atualizarResultado(saida);
@@ -528,10 +540,11 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
                     try {
                         saida = MathBrain.resolverExpressao().replace(".", ",");
+                        contSaida = saida.length();
                         jLabelResultado.setText(saida);
                         calculado();
-
                     } catch (Exception erro) {
+                        contSaida = saida.length();
                         calculado();
                         jLabelCalculo.setForeground(new Color(255,51,51));
                         JanelaErro.setarErro("" + erro.toString().replace("java.lang.Exception: ", "").replace("java.lang.NumberFormatException: empty String", "Revise sua formatação."));
@@ -540,7 +553,6 @@ public class TelaPrincipal extends javax.swing.JFrame {
                         atualizarResultado(saida);
                     }
 
-                    contSaida = saida.length();
                 }else{
                     if(emOperacao){
                         JanelaErro.setarErro("Complete a operação.");
@@ -558,13 +570,13 @@ public class TelaPrincipal extends javax.swing.JFrame {
             JanelaErro.setarErro("Feche o(os) parentese(s).");
             //JOptionPane.showMessageDialog(null, "Feche o(os) parentese(s).");
         }
-        
     }
     
     public void calculado(){
         if(calculado){
             jLabelCalculo.setText(jLabelResultado.getText());
             jLabelCalculo.setForeground(new Color(51,255,51));
+            tamanhodeCaracteres();
             jLabelResultado.setText("");
             calculado = false;
         }
@@ -603,6 +615,13 @@ public class TelaPrincipal extends javax.swing.JFrame {
     
     public boolean eNumero(char vetor){
         if(vetor == '0' || vetor == '1' || vetor == '2' || vetor == '3' || vetor == '4' || vetor == '5' || vetor == '6' || vetor == '7' || vetor == '8' || vetor == '9'){
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean eOperacao(char vetor){
+        if(vetor == '+' || vetor == '-' || vetor == '×' || vetor == '÷' || vetor == '^' || vetor == '√'){
             return true;
         }
         return false;
@@ -745,7 +764,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
         getContentPane().add(jLabel1ParentesesAbre);
         jLabel1ParentesesAbre.setBounds(20, 90, 50, 50);
 
-        jLabelCalculo.setFont(new java.awt.Font("Tahoma", 0, 36)); // NOI18N
+        jLabelCalculo.setFont(new java.awt.Font("Tahoma", 0, 48)); // NOI18N
         jLabelCalculo.setForeground(new java.awt.Color(51, 255, 255));
         jLabelCalculo.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabelCalculo.setText("0");
@@ -756,7 +775,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
         jLabelResultado.setForeground(new java.awt.Color(204, 204, 204));
         jLabelResultado.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         getContentPane().add(jLabelResultado);
-        jLabelResultado.setBounds(10, 50, 250, 50);
+        jLabelResultado.setBounds(10, 60, 250, 50);
 
         jLabelApagar.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabelApagar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/jp/imagens/delet 1.png"))); // NOI18N
