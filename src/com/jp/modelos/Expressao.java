@@ -42,6 +42,13 @@ public class Expressao {
         }
         for(int i = 0; i < vetorChar.length; i++){//percorre todo o vetor de Chars criado analisando cada caractere
             if(vetorChar[i] =='('){//caso o Char no indice "i" do vetor de Chars seja um "(" eu guardo no vetor relacionado o valor numerico do indice "i"
+                if(i > 0 && vetorChar[i-1] == '-'){
+                    this.vetor[indice] += '1';
+                    indice++;
+                    this.vetor[indice] += '×';
+                    indice++;
+                    
+                }
                 indParAbr++;//variavel usada para percorrer os indices dos vetor de parenteses abertos e para ter controle de em que indice do vetor de parenteses abertos esta a informação sobre o ultimo parenteses aberto
                 parentesesAberto[indParAbr] = indice;//guarda o indice em que o parenteses foi aberto no indice "indParAbr" do vetor de parenteses abertos
             }else{
@@ -55,7 +62,7 @@ public class Expressao {
                         indice++;
                     }else{
                         if(vetorChar[i] == '-'){//garante que o numero que vem depois seja guardado como negativo sem precisar guardar o "-" em um indice separado
-                            if(i == 0 || vetorChar[i-1] == '×' || vetorChar[i-1] == '÷' || vetorChar[i-1] == '^' || vetorChar[i-1] == '√' ||  vetorChar[i-1] == '(' ||  vetorChar[i-1] == ')') this.vetor[indice] = "-";//caso o menos venha após uma dessas operações, o indice atual ja está vazio
+                            if(i == 0 || vetorChar[i-1] == '×' || vetorChar[i-1] == '÷' || vetorChar[i-1] == '^' || vetorChar[i-1] == '√') this.vetor[indice] = "-";//caso o menos venha após uma dessas operações, o indice atual ja está vazio
                             else{//caso o caractere anterior não seja uma das expressões eu preciso ir para o proximo indice e fazer com que o valor digitado após seja negativo
                                 indice++;
                                 this.vetor[indice] = "-";
